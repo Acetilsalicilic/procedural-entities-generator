@@ -7,6 +7,7 @@ package world.terrain;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import mathUtils.Utils;
 import mathUtils.Vector2;
 import movement.Player;
 import procentity.peg.ProceduralEntityGeneration;
@@ -60,13 +61,16 @@ public class TerrainGenerator {
 
         for (var chunk : chunks) {
 
-            float lowX = Math.abs(chunk.getCoordinates().x - chunkSize);
-            float highX = Math.abs(chunk.getCoordinates().x);
+            float lowX = Math.abs(chunk.getCoordinates()[0].x());
+            float highX = Math.abs(chunk.getCoordinates()[1].x());
 
-            float lowY = Math.abs(chunk.getCoordinates().y - chunkSize);
-            float highY = Math.abs(chunk.getCoordinates().y);
+            float lowY = Math.abs(chunk.getCoordinates()[0].y());
+            float highY = Math.abs(chunk.getCoordinates()[1].y());
+            
+            float positionX = Math.abs(position.x());
+            float positionY = Math.abs(position.y());
 
-            if (lowX < position.x && position.x < highX && lowY < position.y && position.y < highY) {
+            if (lowX <= positionX && positionX < highX && lowY <= positionY && positionY < highY) {
                 // Is in chunk!!
                 ProceduralEntityGeneration.logger.log("Player in chunk " + chunk);
                 HashMap<String, Chunk> retMap = new HashMap<>();
@@ -74,7 +78,7 @@ public class TerrainGenerator {
                 return retMap;
             } else {
                 Vector2 center = chunk.calcCenter();
-                double currentDistance = Math.sqrt(Math.pow((center.x - position.x), 2) + Math.pow((center.y - position.y), 2));
+                double currentDistance = Math.sqrt(Math.pow((center.x() - position.x()), 2) + Math.pow((center.y() - position.y()), 2));
                 if (currentDistance < distance) {
                     closest = chunk;
                     distance = currentDistance;
@@ -89,12 +93,51 @@ public class TerrainGenerator {
 
     }
 
-    private Chunk createChunk() {
+    private Chunk createChunk(Vector2 position) {
         if (!chunkGeneration) {
             return null;
         }
 
-        throw new UnsupportedOperationException("No chunk generation implemented");
+        // Determine the coordinates of the new chunk
+        int xSign = Utils.getSign(position.x());
+        int ySign = Utils.getSign(position.y());
+        
+        Vector2[] chunkCoord = new Vector2[2];
+        
+        chunkCoord[0] = Vector2.ZERO;
+        chunkCoord[0] = chunkCoord[0].x((float) Math.floor(Math.abs(position.x()) / chunkSize) * xSign * chunkSize);
+        chunkCoord[0] = chunkCoord[0].y((float) Math.floor(Math.abs(position.y()) / chunkSize) * ySign * chunkSize);
+        
+        chunkCoord[1] = Vector2.ZERO;
+        chunkCoord[1] = chunkCoord[1].x((float) Math.ceil(Math.abs(position.x()) / chunkSize) * xSign * chunkSize);
+        chunkCoord[1] = chunkCoord[1].y((float) Math.ceil(Math.abs(position.y()) / chunkSize) * ySign * chunkSize);
+        
+        /**
+         * Some nasty tricks to avoid 0 size chunks.
+         * 
+         * The idea is this: low coord <= player position < high coord,
+         * but if the player position == high coord, we have that the math
+         * above stops working. So, if we are in the top limit, as it is exclusive,
+         * written in maths as [lowCoord, highCoord) in range notations, that means
+         * we are in the next chunk, that has a range of [highCoord, evenHigher).
+         * That's why I sum another chunk if equal.
+         * 
+         * The code looks kind of akward, but mainly I think because now Vector2 are
+         * inmutable. I really created that class for fun, but with the now necessary
+         * inmutability that it provides, it starts to look like a somewhat smart
+         * idea.
+         */
+        if (chunkCoord[0].x() == chunkCoord[1].x()) {
+            chunkCoord[1] = chunkCoord[1].x(chunkCoord[1].x() + chunkSize * xSign);
+        }
+        
+        if (chunkCoord[0].y() == chunkCoord[1].y()) {
+            chunkCoord[1] = chunkCoord[1].y(chunkCoord[1].y() + chunkSize * ySign);
+        }
+        
+        // Create the chunk and return it
+        Chunk newChunk = new Chunk(chunkSize, chunkCoord[0], chunkCoord[1]);
+        return newChunk;
     }
 
     public void evaluatePlayer(Player player, World world) {
@@ -102,7 +145,7 @@ public class TerrainGenerator {
         if (world.getAllChunks().isEmpty() && initialChunk) {
             ProceduralEntityGeneration.logger.logWarning("No chunks in world, generating starting one");
             // Create initial chunk
-            Chunk initial = new Chunk(chunkSize, new Vector2(chunkSize, chunkSize), world.getNextId());
+            Chunk initial = new Chunk(chunkSize, Vector2.ZERO, Vector2.ONE.multiplyBy(chunkSize));
             world.addChunk(initial);
         }
         if (!world.getAllChunks().isEmpty() && world.getAllChunks().get(0).getSize() != chunkSize) {
@@ -113,7 +156,7 @@ public class TerrainGenerator {
         Map<String, Chunk> result = isInChunk(player.getCoordinates(), world.getAllChunks());
 
         if (!result.containsKey("true")) {
-            Chunk newChunk = createChunk();
+            Chunk newChunk = createChunk(player.getCoordinates());
             world.addChunk(newChunk);
         }
     }
