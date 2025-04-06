@@ -23,12 +23,9 @@ public class World {
     }
     
     public void addChunk(Chunk newChunk) {
+        newChunk.setId(chunks.size());
         ProceduralEntityGeneration.logger.log("Adding chunk to world " + newChunk);
         chunks.add(newChunk);
-    }
-    
-    public int getNextId() {
-        return chunks.size();
     }
     
     public List<Chunk> getAllChunks() {
