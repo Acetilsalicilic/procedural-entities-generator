@@ -4,10 +4,24 @@
  */
 package worldprinting;
 
+import procentity.peg.ProceduralEntityGeneration;
+import world.World;
+
 /**
  *
  * @author acetil
  */
 public class WorldPrinter {
+    private World world;
     
+    public WorldPrinter(World world) {
+        this.world = world;
+    }
+    
+    public void printChunks() {
+        ProceduralEntityGeneration.logger.log("World chunks:");
+        for (var chunk : world.getAllChunks()) {
+            ProceduralEntityGeneration.logger.log("- " + chunk.toString());
+        }
+    }
 }
