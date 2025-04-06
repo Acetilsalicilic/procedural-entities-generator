@@ -4,11 +4,13 @@
  */
 package procentity.peg.entities;
 
+import mathUtils.Vector2;
+
 /**
  *
  * @author acetil
  */
 public interface IEntity {
-    public float[] getCoordinates();
+    public Vector2 getCoordinates();
     public String getName();
 }

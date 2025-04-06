@@ -4,15 +4,17 @@
  */
 package procentity.peg.entities;
 
+import mathUtils.Vector2;
+
 /**
  *
  * @author acetil
  */
 public class Tree implements IEntity {
-    private float coordinates[];
+    private Vector2 coordinates;
     
     @Override
-    public float[] getCoordinates() {
+    public Vector2 getCoordinates() {
         return coordinates;
     }
 

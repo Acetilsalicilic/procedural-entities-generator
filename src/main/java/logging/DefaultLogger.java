@@ -80,10 +80,11 @@ public class DefaultLogger {
     }
     
     public void logWarning(String message) {
-        receiveLog("WARNING", message);
+        receiveLog("*WARNING*", message);
     }
     
     public void close() {
+        System.out.println(buffer.toString());
         try {
             fw.append(buffer);
             fw.close();
@@ -112,7 +113,6 @@ public class DefaultLogger {
 
     private void writeTofile() {
         try {
-            System.out.println("Writing " + buffer.length() + " to the file");
             fw.append(buffer);
         } catch (IOException e) {
             System.out.println("ERROR writing to file");

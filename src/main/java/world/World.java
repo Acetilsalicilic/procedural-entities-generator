@@ -6,6 +6,7 @@ package world;
 
 import java.util.ArrayList;
 import java.util.List;
+import procentity.peg.ProceduralEntityGeneration;
 import world.terrain.Chunk;
 
 /**
@@ -22,7 +23,12 @@ public class World {
     }
     
     public void addChunk(Chunk newChunk) {
+        ProceduralEntityGeneration.logger.log("Adding chunk to world " + newChunk);
         chunks.add(newChunk);
+    }
+    
+    public int getNextId() {
+        return chunks.size();
     }
     
     public List<Chunk> getAllChunks() {
