@@ -23,27 +23,29 @@ public class ProceduralEntityGeneration {
         logger = new DefaultLogger(System.getProperty("user.home") + "/procedural.txt", 2, true);
         
         logger.logWarning("Instantiating world");
-        World world = new World(500f);
+        World world = new World(500f, logger);
         logger.log("World: " + world);
         
         // confirming player
-        Player.initialize(new Vector2(-14f, 14f));
-        logger.log("Player: " + Player.getInstance());
+        Player player = new Player(new Vector2(10f, 10f));
+        logger.log("Player: " + player);
         logger.log("Creating terrain generator");
-        TerrainGenerator tr = new TerrainGenerator(7f, 3, true, true, false, true);
+        TerrainGenerator tr = new TerrainGenerator(7f, 3, true, true, false, true, logger);
         
         logger.log("First analyzing");
-        tr.evaluatePlayer(Player.getInstance(), world);
+        tr.evaluatePlayer(player, world);
         
         logger.log("Second analysis");
-        tr.evaluatePlayer(Player.getInstance(), world);
+        tr.evaluatePlayer(player, world);
         
-        WorldPrinter wp = new WorldPrinter(world);
+        WorldPrinter wp = new WorldPrinter(world, logger);
         wp.printChunks();
         // Game loop
         /*while (true) {
             
         }*/
+        
+        wp.printArea(25, player);
         logger.close();
     }
 }

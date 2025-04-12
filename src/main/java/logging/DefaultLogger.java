@@ -83,10 +83,15 @@ public class DefaultLogger {
         receiveLog("*WARNING*", message);
     }
     
+    public void logWorld(StringBuilder space) {
+        receiveLog("--World--", "\n" + space.toString());
+    }
+    
     public void close() {
         System.out.println(buffer.toString());
         try {
             fw.append(buffer);
+            fw.append("[CLOSING] This log ends\n");
             fw.close();
         } catch (Exception e) {
             throw new UnsupportedOperationException("not supported exception");

@@ -14,10 +14,10 @@ import procentity.peg.entities.IEntity;
  * @author acetil
  */
 public class Chunk {
-    private Vector2 fpCoord;
-    private Vector2 spCoord;
-    private List<IEntity> entityList;
-    private float size;
+    private final Vector2 fpCoord;
+    private final Vector2 spCoord;
+    private final List<IEntity> entityList;
+    private final float size;
     private Integer id;
     
     public Chunk(float size, Vector2 firstPointCoord, Vector2 secondPointCoord) {

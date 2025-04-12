@@ -60,6 +60,40 @@ public class Vector2 {
         return "(" + x + ", " + y + ")";
     }
     
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof Vector2)) {
+            return false;
+        }
+        
+        Vector2 objVec = (Vector2) object;
+        
+        if (objVec.x() == x && objVec.y() == y) {
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean isInVectorRange(Vector2 low, Vector2 high) {
+        float lowX = Math.min(low.x(), high.x());
+        float highX = Math.max(low.x(), high.x());
+        
+        float lowY = Math.min(low.y(), high.y());
+        float highY = Math.max(low.y(), high.y());
+        
+        return lowX < x && x < highX && lowY < y && y < highY;
+    }
+    
+    public boolean isInVectorRange(Vector2 low, float offset) {
+        float lowX = Math.abs(low.x());
+        float highX = lowX + offset;
+        
+        float lowY = Math.abs(low.y());
+        float highY = lowY + offset;
+        
+        return lowX < x && x < highX && lowY < y && y < highY;
+    }
+    
     // Some constants
     public static final Vector2 ZERO = new Vector2(0, 0);
     public static final Vector2 ONE = new Vector2(1, 1);

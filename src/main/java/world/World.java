@@ -6,6 +6,7 @@ package world;
 
 import java.util.ArrayList;
 import java.util.List;
+import logging.DefaultLogger;
 import procentity.peg.ProceduralEntityGeneration;
 import world.terrain.Chunk;
 
@@ -16,15 +17,17 @@ import world.terrain.Chunk;
 public class World {
     private float size;
     private List<Chunk> chunks;
+    private DefaultLogger logger;
     
-    public World(float size) {
+    public World(float size, DefaultLogger logger) {
         this.size = size;
+        this.logger = logger;
         chunks = new ArrayList<Chunk>();
     }
     
     public void addChunk(Chunk newChunk) {
         newChunk.setId(chunks.size());
-        ProceduralEntityGeneration.logger.log("Adding chunk to world " + newChunk);
+        logger.log("Adding chunk to world " + newChunk);
         chunks.add(newChunk);
     }
     

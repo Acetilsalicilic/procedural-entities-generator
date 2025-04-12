@@ -7,6 +7,7 @@ package world.terrain;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import logging.DefaultLogger;
 import mathUtils.Utils;
 import mathUtils.Vector2;
 import movement.Player;
@@ -26,26 +27,29 @@ public class TerrainGenerator {
     private boolean chunkGeneration;
     private boolean entityCreation;
     private boolean initialChunk;
+    
+    private DefaultLogger logger;
 
-    public TerrainGenerator(float chunkSize, float entityDistance) {
-        this(chunkSize, entityDistance, true, true, true, false);
+    public TerrainGenerator(float chunkSize, float entityDistance, DefaultLogger logger) {
+        this(chunkSize, entityDistance, true, true, true, false, logger);
     }
 
-    public TerrainGenerator(Chunk sampleChunk, float entityDistance) {
-        this(sampleChunk.getSize(), entityDistance, true, true, true, false);
+    public TerrainGenerator(Chunk sampleChunk, float entityDistance, DefaultLogger logger) {
+        this(sampleChunk.getSize(), entityDistance, true, true, true, false, logger);
     }
 
-    public TerrainGenerator(float chunkSize, float entityDistance, boolean chunkSearch, boolean chunkGeneration, boolean entityCreation, boolean initialChunk) {
+    public TerrainGenerator(float chunkSize, float entityDistance, boolean chunkSearch, boolean chunkGeneration, boolean entityCreation, boolean initialChunk, DefaultLogger logger) {
         this.chunkSize = chunkSize;
         this.entityDistance = entityDistance;
         this.chunkSearch = chunkSearch;
         this.chunkGeneration = chunkGeneration;
         this.entityCreation = entityCreation;
         this.initialChunk = initialChunk;
+        this.logger = logger;
 
-        ProceduralEntityGeneration.logger.log("Creating TerrainGenerator with config {chunkSearch: " + chunkSearch + ", chunkGeneration: " + chunkGeneration + ", entityGeneration: " + entityCreation + ", initialChunk: " + initialChunk + "}");
-        ProceduralEntityGeneration.logger.log("Values: {chunkSize: " + this.chunkSize + ", entityDistance: " + this.entityDistance + "}");
-        ProceduralEntityGeneration.logger.log("A starting chunk will be generated when a world is first analyzed");
+        logger.log("Creating TerrainGenerator with config {chunkSearch: " + chunkSearch + ", chunkGeneration: " + chunkGeneration + ", entityGeneration: " + entityCreation + ", initialChunk: " + initialChunk + "}");
+        logger.log("Values: {chunkSize: " + this.chunkSize + ", entityDistance: " + this.entityDistance + "}");
+        logger.log("A starting chunk will be generated when a world is first analyzed");
     }
 
     private Map<String, Chunk> isInChunk(Vector2 position, List<Chunk> chunks) {
@@ -61,18 +65,27 @@ public class TerrainGenerator {
 
         for (var chunk : chunks) {
 
-            float lowX = Math.abs(chunk.getCoordinates()[0].x());
+            /*float lowX = Math.abs(chunk.getCoordinates()[0].x());
             float highX = Math.abs(chunk.getCoordinates()[1].x());
 
             float lowY = Math.abs(chunk.getCoordinates()[0].y());
             float highY = Math.abs(chunk.getCoordinates()[1].y());
             
             float positionX = Math.abs(position.x());
-            float positionY = Math.abs(position.y());
+            float positionY = Math.abs(position.y()); */
+            
+            float lowX = Math.min(chunk.getCoordinates()[0].x(), chunk.getCoordinates()[1].x());
+            float highX = Math.max(chunk.getCoordinates()[0].x(), chunk.getCoordinates()[1].x());
+            
+            float lowY = Math.min(chunk.getCoordinates()[0].y(), chunk.getCoordinates()[1].y());
+            float highY = Math.max(chunk.getCoordinates()[0].y(), chunk.getCoordinates()[1].y());
+            
+            float positionX = position.x();
+            float positionY = position.y();
 
             if (lowX <= positionX && positionX < highX && lowY <= positionY && positionY < highY) {
                 // Is in chunk!!
-                ProceduralEntityGeneration.logger.log("Player in chunk " + chunk);
+                logger.log("Player in chunk " + chunk);
                 HashMap<String, Chunk> retMap = new HashMap<>();
                 retMap.put("true", chunk);
                 return retMap;
@@ -86,7 +99,7 @@ public class TerrainGenerator {
             }
         }
 
-        ProceduralEntityGeneration.logger.logWarning("Player not in chunk");
+        logger.logWarning("Player not in chunk");
         HashMap<String, Chunk> retMap = new HashMap<>();
         retMap.put("false", closest);
         return retMap;
@@ -143,13 +156,13 @@ public class TerrainGenerator {
     public void evaluatePlayer(Player player, World world) {
         // Initial chunk generation
         if (world.getAllChunks().isEmpty() && initialChunk) {
-            ProceduralEntityGeneration.logger.logWarning("No chunks in world, generating starting one");
+            logger.logWarning("No chunks in world, generating starting one");
             // Create initial chunk
             Chunk initial = new Chunk(chunkSize, Vector2.ZERO, Vector2.ONE.multiplyBy(chunkSize));
             world.addChunk(initial);
         }
         if (!world.getAllChunks().isEmpty() && world.getAllChunks().get(0).getSize() != chunkSize) {
-            ProceduralEntityGeneration.logger.logError("chunkSize of terrainGenerator isn't compatible with chunk size of world!");
+            logger.logError("chunkSize of terrainGenerator isn't compatible with chunk size of world!");
             return;
         }
 
